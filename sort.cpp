@@ -1,19 +1,21 @@
 #include "onegin.h"
 
 
-void quicksort (void *data, size_t len, size_t size, int (*comp)(const void*, const void*))
+void Quicksort (void *data, size_t len, size_t size, int (*comp)(const void*, const void*))
 {
     if (len <= 1) return;
 
     void *p = 0;
     size_t len1 = 0;
 
+    void *partition (void *data, size_t len, size_t size, int (*comp)(const void*, const void*));
+
     p = partition(data, len, size, comp);
 
     len1 = ((size_t)p - (size_t)data) / size;
 
-    quicksort (data, len1, size, comp);
-    quicksort (p, len - len1, size, comp);
+    Quicksort (data, len1, size, comp);
+    Quicksort (p, len - len1, size, comp);
 }
 
 void *partition (void *data, size_t len, size_t size, int (*comp)(const void*, const void*))
@@ -106,13 +108,16 @@ void swap(void *pointer1, void *pointer2, size_t size)
 
 int comp1 (const void *p1, const void *p2)
 {
-    char *s1 = (char *)p1;
-    char *s2 = (char *)p2;
+    if (p1 == NULL || p2 == NULL) return 0;
+
+    if (p1 == p2) return 0;
+    char *s1 = *(char **)p1;
+    char *s2 = *(char **)p2;
 
     while (1)
     {
-        if (*s1 == '\0') return (*s2 == '\0' ? 0 : 1);
-        if (*s2 == '\0') return -1;
+        if (*s1 == '\0') return (*s2 == '\0' ? 0 : -1);
+        if (*s2 == '\0') return 1;
 
         if (!isalpha(*s1))
         {
@@ -126,8 +131,8 @@ int comp1 (const void *p1, const void *p2)
             continue;
         }
 
-        if (tolower(*s1) > tolower(*s2)) return  1;
-        if (tolower(*s1) < tolower(*s2)) return -1;
+        if (tolower (*s1) > tolower (*s2)) return  1;
+        if (tolower (*s1) < tolower (*s2)) return -1;
 
         s1++;
         s2++;
@@ -137,16 +142,18 @@ int comp1 (const void *p1, const void *p2)
 
 int comp2 (const void *p1, const void *p2)
 {
-    char *s1 = (char *)p1;
-    char *s2 = (char *)p2;
+    if (p1 == NULL || p2 == NULL) return 0;
+
+    char *s1 = *(char **)p1;
+    char *s2 = *(char **)p2;
 
     s1 += strlen (s1) - 1;
     s2 += strlen (s2) - 1;
 
     while (1)
     {
-        if (s1 == (char *)p1) return (s2 == (char *)p2 ? 0 : 1);
-        if (s2 == (char *)p2) return -1;
+        if (s1 < *(char **)p1) return (s2 < *(char **)p2 ? 0 : -1);
+        if (s2 < *(char **)p2) return 1;
 
         if (!isalpha(*s1))
         {

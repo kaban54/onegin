@@ -1,46 +1,37 @@
 #include "onegin.h"
 
+const char  INPUTNAME[] =  "input.txt";
+const char OUTPUTNAME[] = "output.txt";
 
 int main(int argc, char *argv[])
 {
-    char  input_file_name[MAXLEN] =  "input.txt";
-    char output_file_name[MAXLEN] = "output.txt";
+    char  *input_file_name = (char *)  INPUTNAME;
+    char *output_file_name = (char *) OUTPUTNAME;
     
-    if (argc >= 2 && strlen(argv[1]) < MAXLEN) strcpy ( input_file_name, argv[1]);
-    if (argc >= 3 && strlen(argv[2]) < MAXLEN) strcpy (output_file_name, argv[2]);
+    if (argc >= 2 && strlen(argv[1]) < MAXLEN)  input_file_name = argv[1];
+    if (argc >= 3 && strlen(argv[2]) < MAXLEN) output_file_name = argv[2];
 
-    FILE *inp_file = NULL;
-    FILE *out_file = NULL;
+    FILE *inp_file = fopen( input_file_name, "r");
+    FILE *out_file = fopen(output_file_name, "w");
 
-    if ((inp_file = fopen( input_file_name, "r")) == NULL) return  INPUT_ERROR;
-    if ((out_file = fopen(output_file_name, "w")) == NULL) return OUTPUT_ERROR;
-
-    char **data = 0;
-    char *buffer = 0;
-
-    size_t len = 0;
-
-    data = read_data (inp_file, &len);
+    if (inp_file == NULL) return  INPUT_ERROR;
+    if (out_file == NULL) return OUTPUT_ERROR;
+ 
+    struct Text txt = ReadText (inp_file);
+ 
     fclose (inp_file);
 
-    buffer = *data;
+    Sort1 (txt);
+    WriteText (txt, out_file);
 
-    sort_data (data, len, comp1);
-    write_data (data, out_file);
+    Sort2 (txt);
+    WriteText (txt, out_file);
 
-    fprintf(out_file, "\n\n");
-
-    sort_data (data, len, comp2);
-    write_data (data, out_file);
-
-    fprintf(out_file, "\n\n");
-
-    write_buf (buffer, len, out_file);
+    WriteOriginal (txt, out_file);
     
     fclose (out_file);
-
-    free ((void *)data);
-    free ((void *)buffer);
+    FreeText (txt);
 
     return 0;
 }
+

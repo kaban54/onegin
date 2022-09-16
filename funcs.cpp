@@ -1,65 +1,109 @@
 #include "onegin.h"
 
-char **read_data (FILE *inp_file, size_t *plen)
+size_t GetSize (FILE *inp_file)
 {
-    struct stat stat_buf = {};
-    char *buffer = 0;
-    char *ptr = 0;
-    char **str = 0;
-    char **data = 0;
-    size_t filesize = 0;
-    size_t str_count = 0;
+    struct stat stat_buf {};
 
-    fstat (fileno(inp_file), &stat_buf);
-    filesize = stat_buf.st_size;
+    fstat (fileno (inp_file), &stat_buf);
+    return stat_buf.st_size;
+}
 
-    if((buffer = (char *`)malloc(filesize + 1)) == NULL) return NULL;
-
-    fread (buffer, sizeof(char), filesize, inp_file);
+struct Text ReadText (FILE *inp_file)
+{
+    struct Text txt = {};
     
-    for (ptr = buffer; ptr < buffer + filesize; ptr++)
+    if (inp_file == NULL) return txt; //?
+
+    size_t filesize = GetSize (inp_file);
+
+    txt.buffer = (char *) calloc (filesize + 1, sizeof(char));
+    if ((txt.buffer) == NULL) return txt;
+
+    txt.buflen = fread (txt.buffer, sizeof(char), filesize, inp_file);
+
+    char *pch = NULL;
+    txt.len = 0;
+
+    for (pch = txt.buffer; pch < txt.buffer + txt.buflen; pch++)
     {
-        if (*ptr == '\n')
+        if (*pch == '\n')
         {
-            str_count++;
-            *ptr = '\0';
+            txt.len++;
+            *pch = '\0';
         }
     }
-    *ptr = '\0';
 
-    if ((data = (char **)malloc(str_count + 1)) == NULL) return NULL;
-    *plen = str_count;
+    txt.len++;
+    *pch = '\0';
+    txt.bufend = pch;
 
-    str = data;
-    for (ptr = buffer; ptr < buffer + filesize; ptr++)
-        if (*ptr == '\0') *(str++) = ptr;
-    
-    return data;
+    txt.data = (char **) calloc (txt.len + 1, sizeof (char*));
+    if ((txt.data) == NULL) return txt; //?
+
+    char **pstr = txt.data;
+
+    *(pstr++) = txt.buffer;
+
+    for (pch = txt.buffer; pch < txt.bufend; pch++)
+        if (*pch == '\0') *(pstr++) = pch + 1;
+    *pstr = NULL;
+
+    return txt;
 }
 
-void write_data (char **data, FILE *out_file)
+void WriteText (struct Text txt, FILE *out_file)
 {
-    if (out_file == NULL || data == NULL) return;
-    while(*data != NULL) fputs(*data++, out_file);
-}
+    if (out_file == NULL) return;
+    if (txt.data == NULL) return;
 
-void write_buf (char *buffer, size_t len, FILE *out_file)
-{
-    for (len; len > 0; len--)
+    while (*(txt.data) != NULL)
     {
-        if (*buffer == '\0')
+        fputs (*(txt.data++), out_file);
+        //fputc ('\r', out_file);
+        fputc ('\n', out_file);
+    }
+    fputc('\n', out_file);
+}
+
+
+void WriteOriginal (struct Text txt, FILE *out_file)
+{
+    while (1)
+    {
+        if (*txt.buffer == '\0')
         {
-            fputc ('\r', out_file);
-            fputc ('\n', out_file);
+            if (--txt.len > 0)
+            {
+                //fputc ('\r', out_file);
+                fputc ('\n', out_file);
+            }
+            else break;
         }
         else
-            fputc(*buffer, out_file);
-        buffer++;
+            fputc (*txt.buffer, out_file);
+        
+        txt.buffer++;
     }
 }
 
-char **sort_data (char **data, size_t len, int (*comp)(const void*, const void*))
+
+void Sort1 (struct Text txt)
 {
-    quicksort ((void *)data, len, sizeof(char*), comp);
-    return data;
+    int comp1 (const void *p1, const void *p2);
+
+    qsort ((void *)txt.data, txt.len, sizeof (char *), comp1);
+}
+
+void Sort2 (struct Text txt)
+{
+    int comp2 (const void *p1, const void *p2);
+    
+    Quicksort ((void *)txt.data, txt.len, sizeof (char *), comp2);
+}
+
+
+void FreeText (struct Text txt)
+{
+    free (txt.buffer);
+    free (txt.data);
 }

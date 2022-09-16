@@ -9,25 +9,36 @@
 #include <ctype.h>
 #include <sys/stat.h>
 
+
 const int MAXLEN = 100;
 
-// sort functions ----------------------------------------------------------------------------------------
-void  quicksort (void *data, size_t len, size_t size, int (*comp)(const void*, const void*));
-void *partition (void *data, size_t len, size_t size, int (*comp)(const void*, const void*));
+
+struct Text
+{
+    size_t len    = 0;
+    size_t buflen = 0;
+    char *buffer = NULL;
+    char *bufend = NULL;
+    char **data  = NULL;
+};
+
+
+void Quicksort (void *data, size_t len, size_t size, int (*comp)(const void *elem1, const void *elem2));
 
 void swap (void *p1, void *p2, size_t size);
 
-int comp1 (const void *p1, const void *p2);
-int comp2 (const void *p1, const void *p2);
-// ------------------------------------------------------------------------------------------------------
 
-char **read_data (FILE *inp_file, size_t *plen);
+struct Text ReadText (FILE *inp_file);
 
-void  write_data (char **data, FILE *out_file);
+size_t GetSize (FILE *inp_file)
 
-void  write_buf (char *buffer, size_t len, FILE *out_file);
+void WriteText     (struct Text txt, FILE *out_file);
+void WriteOriginal (struct Text txt, FILE *out_file);
 
-char **sort_data (char **data, size_t len, int (*comp)(const void*, const void*));
+void Sort1 (struct Text txt);
+void Sort2 (struct Text txt);
+
+void FreeText (struct Text txt);
 
 
 enum ERRORS 
@@ -35,5 +46,7 @@ enum ERRORS
     INPUT_ERROR  = 1,
     OUTPUT_ERROR = 2,
 };
+
+
 
 #endif

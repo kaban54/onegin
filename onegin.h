@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <sys/stat.h>
-
+#include <locale.h>
 
 const size_t SEP_LEN = 107;
 

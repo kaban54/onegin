@@ -1,10 +1,13 @@
 #include "onegin.h"
 
+
 const char  INPUTNAME[] =  "input.txt";
 const char OUTPUTNAME[] = "output.txt";
 
 int main(int argc, char *argv[])
-{
+{   
+    setlocale (LC_ALL, "Rus");
+    
     const char  *input_file_name =  INPUTNAME;
     const char *output_file_name = OUTPUTNAME;
     

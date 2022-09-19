@@ -5,26 +5,24 @@ const char OUTPUTNAME[] = "output.txt";
 
 int main(int argc, char *argv[])
 {
-    char  *input_file_name = (char *)  INPUTNAME;
-    char *output_file_name = (char *) OUTPUTNAME;
+    const char  *input_file_name =  INPUTNAME;
+    const char *output_file_name = OUTPUTNAME;
     
-    if (argc >= 2 && strlen(argv[1]) < MAXLEN)  input_file_name = argv[1];
-    if (argc >= 3 && strlen(argv[2]) < MAXLEN) output_file_name = argv[2];
+    if (argc >= 2)  input_file_name = argv[1];
+    if (argc >= 3) output_file_name = argv[2];
 
-    FILE *inp_file = fopen( input_file_name, "r");
-    FILE *out_file = fopen(output_file_name, "w");
+    struct Text text = {};
+    struct Text *txt = &text;
+    
+    ReadText (input_file_name, txt);
 
-    if (inp_file == NULL) return  INPUT_ERROR;
+    FILE *out_file = fopen (output_file_name, "w");
     if (out_file == NULL) return OUTPUT_ERROR;
- 
-    struct Text txt = ReadText (inp_file);
- 
-    fclose (inp_file);
 
-    Sort1 (txt);
+    qsort     ((void *) (txt -> data), txt -> len, sizeof ((txt -> data)[0]), CompFwd);
     WriteText (txt, out_file);
 
-    Sort2 (txt);
+    Quicksort ((void *) (txt -> data), txt -> len, sizeof ((txt -> data)[0]), CompBwd);
     WriteText (txt, out_file);
 
     WriteOriginal (txt, out_file);

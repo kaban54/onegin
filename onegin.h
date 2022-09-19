@@ -10,41 +10,57 @@
 #include <sys/stat.h>
 
 
-const int MAXLEN = 100;
-
-
 struct Text
 {
     size_t len    = 0;
     size_t buflen = 0;
-    char *buffer = NULL;
-    char *bufend = NULL;
-    char **data  = NULL;
+    char  *buffer = NULL; 
+    struct Line *data = NULL;
+};
+
+struct Line
+{
+    size_t len = 0;
+    char *str = NULL;
 };
 
 
 void Quicksort (void *data, size_t len, size_t size, int (*comp)(const void *elem1, const void *elem2));
 
+void SortTwo (void *data, size_t size, int (*comp)(const void*, const void*));
+
+void *partition (void *data, size_t len, size_t size, int (*comp)(const void*, const void*));
+
 void swap (void *p1, void *p2, size_t size);
 
+int CompFwd (const void *p1, const void *p2);
 
-struct Text ReadText (FILE *inp_file);
+int CompBwd (const void *p1, const void *p2);
 
-size_t GetSize (FILE *inp_file)
 
-void WriteText     (struct Text txt, FILE *out_file);
-void WriteOriginal (struct Text txt, FILE *out_file);
+int ReadText (const char *input_file_name, struct Text *txt);
 
-void Sort1 (struct Text txt);
-void Sort2 (struct Text txt);
+size_t GetSize (FILE *inp_file);
 
-void FreeText (struct Text txt);
+size_t CharReplace (char *str, char ch1, char ch2);
+
+int SetLines (struct Text *txt);
+
+
+int WriteText     (struct Text *txt, FILE *out_file);
+
+int WriteOriginal (struct Text *txt, FILE *out_file);
+
+
+void FreeText (struct Text *txt);
 
 
 enum ERRORS 
 {
     INPUT_ERROR  = 1,
     OUTPUT_ERROR = 2,
+    ACCESS_ERROR = 3,
+    ALLOC_ERROR  = 4,
 };
 
 

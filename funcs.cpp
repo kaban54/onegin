@@ -1,109 +1,121 @@
 #include "onegin.h"
 
+
+int ReadText (const char *input_file_name, struct Text *txt)
+{    
+    if (input_file_name == NULL) return  INPUT_ERROR;
+    if           (txt == NULL) return ACCESS_ERROR;
+
+    FILE *inp_file = fopen (input_file_name, "r");
+    if (inp_file == NULL) return INPUT_ERROR;
+
+    size_t filesize = GetSize (inp_file);
+
+    txt -> buffer = (char *) calloc (filesize + 1, sizeof((txt -> buffer)[0]));
+    if ((txt -> buffer) == NULL) return ALLOC_ERROR;
+
+    txt -> buflen = fread (txt -> buffer, sizeof((txt -> buffer)[0]), filesize, inp_file);
+    *(txt -> buffer + txt -> buflen) = '\0';
+    
+    fclose (inp_file);
+
+    txt -> len = CharReplace (txt -> buffer, '\n', '\0');
+
+    SetLines (txt);
+
+    return 0;
+}
+
 size_t GetSize (FILE *inp_file)
 {
-    struct stat stat_buf {};
+    if (inp_file == NULL) return 0;
+    struct stat stat_buf = {};
 
     fstat (fileno (inp_file), &stat_buf);
     return stat_buf.st_size;
 }
 
-struct Text ReadText (FILE *inp_file)
+size_t CharReplace (char *str, char ch1, char ch2)
 {
-    struct Text txt = {};
-    
-    if (inp_file == NULL) return txt; //?
+    if (str == NULL) return 0;
 
-    size_t filesize = GetSize (inp_file);
+    size_t count = 0;
+    str = strchr (str, ch1);
 
-    txt.buffer = (char *) calloc (filesize + 1, sizeof(char));
-    if ((txt.buffer) == NULL) return txt;
-
-    txt.buflen = fread (txt.buffer, sizeof(char), filesize, inp_file);
-
-    char *pch = NULL;
-    txt.len = 0;
-
-    for (pch = txt.buffer; pch < txt.buffer + txt.buflen; pch++)
+    while (str != NULL)
     {
-        if (*pch == '\n')
-        {
-            txt.len++;
-            *pch = '\0';
-        }
+        count++;
+        *str = ch2;
+        str = strchr (str + 1, ch1);
     }
 
-    txt.len++;
-    *pch = '\0';
-    txt.bufend = pch;
-
-    txt.data = (char **) calloc (txt.len + 1, sizeof (char*));
-    if ((txt.data) == NULL) return txt; //?
-
-    char **pstr = txt.data;
-
-    *(pstr++) = txt.buffer;
-
-    for (pch = txt.buffer; pch < txt.bufend; pch++)
-        if (*pch == '\0') *(pstr++) = pch + 1;
-    *pstr = NULL;
-
-    return txt;
+    return count;
 }
 
-void WriteText (struct Text txt, FILE *out_file)
+int SetLines (struct Text *txt)
 {
-    if (out_file == NULL) return;
-    if (txt.data == NULL) return;
+    if (txt == NULL) return ACCESS_ERROR;
 
-    while (*(txt.data) != NULL)
+    txt -> data = (struct Line*) calloc (txt -> len + 1, sizeof ((txt -> data)[0]));
+    if ((txt -> data) == NULL) return ALLOC_ERROR;
+
+    char *str_ptr = txt -> buffer;
+    size_t length = 0;
+
+    for (unsigned int index = 0; index < txt -> len; index++)
     {
-        fputs (*(txt.data++), out_file);
+        length = strlen (str_ptr);
+
+        (txt -> data + index) -> str = str_ptr;
+        (txt -> data + index) -> len =  length;
+
+        str_ptr += length + 1;
+    }
+
+    (txt -> data + txt -> len) -> str = NULL;
+    (txt -> data + txt -> len) -> len = 0;
+
+    return 0;
+}
+
+
+int WriteText (struct Text *txt, FILE *out_file)
+{
+    if (out_file == NULL) return OUTPUT_ERROR;
+    if (txt      == NULL) return ACCESS_ERROR;
+
+    for (unsigned int index = 0; index < txt -> len; index++)
+    {
+        fputs ((txt -> data + index) -> str, out_file);
         //fputc ('\r', out_file);
         fputc ('\n', out_file);
     }
     fputc('\n', out_file);
+
+    return 0;
 }
 
 
-void WriteOriginal (struct Text txt, FILE *out_file)
+int WriteOriginal (struct Text *txt, FILE *out_file)
 {
-    while (1)
+    if (out_file == NULL) return OUTPUT_ERROR;
+    if (txt      == NULL) return ACCESS_ERROR;
+ 
+    char *str = txt -> buffer;
+    while (str < txt -> buffer + txt -> buflen)
     {
-        if (*txt.buffer == '\0')
-        {
-            if (--txt.len > 0)
-            {
-                //fputc ('\r', out_file);
-                fputc ('\n', out_file);
-            }
-            else break;
-        }
-        else
-            fputc (*txt.buffer, out_file);
-        
-        txt.buffer++;
+        fputs (str,  out_file);
+        // fputc ('\r', out_file);
+        fputc ('\n', out_file);
+        str = strchr (str, '\0') + 1;
     }
+
+    return 0;
 }
 
 
-void Sort1 (struct Text txt)
+void FreeText (struct Text *txt)
 {
-    int comp1 (const void *p1, const void *p2);
-
-    qsort ((void *)txt.data, txt.len, sizeof (char *), comp1);
-}
-
-void Sort2 (struct Text txt)
-{
-    int comp2 (const void *p1, const void *p2);
-    
-    Quicksort ((void *)txt.data, txt.len, sizeof (char *), comp2);
-}
-
-
-void FreeText (struct Text txt)
-{
-    free (txt.buffer);
-    free (txt.data);
+    free (txt -> buffer);
+    free (txt ->   data);
 }

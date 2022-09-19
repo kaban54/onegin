@@ -9,12 +9,8 @@ void Quicksort (void *data, size_t len, size_t size, int (*comp)(const void*, co
         return;
     }
 
-    void *central = 0;
-    size_t len1 = 0;
-
-    central = partition (data, len, size, comp);
-
-    len1 = ((size_t) central - (size_t) data) / size;
+    void *central = partition (data, len, size, comp);
+    size_t len1 = ((size_t) central - (size_t) data) / size;
 
     Quicksort (data   , len1      , size, comp);
     Quicksort (central, len - len1, size, comp);
@@ -29,6 +25,8 @@ void *partition (void *data, size_t len, size_t size, int (*comp)(const void*, c
     if (comp (il, c) > 0) swap (il, c, size);
     if (comp (c, ir) > 0) swap (c, ir, size);
     if (comp (il, c) > 0) swap (il, c, size);
+
+    if (len == 3) return (void *) c;
 
     while (il < ir)
     {

@@ -131,7 +131,7 @@ int PrintSep (FILE *out_file)
 {
     if (out_file == NULL) return OUTPUT_ERROR;
 
-    for (unsigned int _ = 0; _ <= SEP_LEN; _++) fputc ('=', out_file);
+    for (unsigned int i = 0; i <= SEP_LEN; i++) fputc ('=', out_file);
     fputc ('\n', out_file);
 
     return 0;

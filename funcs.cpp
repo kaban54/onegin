@@ -19,7 +19,7 @@ int ReadText (const char *input_file_name, struct Text *txt)
     
     fclose (inp_file);
 
-    txt -> len = CharReplace (txt -> buffer, '\n', '\0');
+    txt -> len = CharReplace (txt -> buffer, '\n', '\0') + 1;
 
     SetLines (txt);
 
@@ -79,40 +79,63 @@ int SetLines (struct Text *txt)
 }
 
 
-int WriteText (struct Text *txt, FILE *out_file)
+int WriteText (struct Text *txt, FILE *out_file, int write_param)
 {
     if (out_file == NULL) return OUTPUT_ERROR;
     if (txt      == NULL) return ACCESS_ERROR;
 
+    PrintSep (out_file);
+
     for (unsigned int index = 0; index < txt -> len; index++)
     {
+        if (write_param == SKIP_EMPTY && strcmp ("", (txt -> data + index) -> str) == 0)
+            continue;
+
         fputs ((txt -> data + index) -> str, out_file);
         //fputc ('\r', out_file);
         fputc ('\n', out_file);
     }
     fputc('\n', out_file);
 
+    PrintSep (out_file);
+
     return 0;
 }
 
 
-int WriteOriginal (struct Text *txt, FILE *out_file)
+int WriteOriginal (struct Text *txt, FILE *out_file, int write_param)
 {
     if (out_file == NULL) return OUTPUT_ERROR;
     if (txt      == NULL) return ACCESS_ERROR;
  
+    PrintSep (out_file);
+
     char *str = txt -> buffer;
     while (str < txt -> buffer + txt -> buflen)
     {
+        if (write_param == SKIP_EMPTY && strcmp ("", str) == 0)
+            continue;
+
         fputs (str,  out_file);
         // fputc ('\r', out_file);
         fputc ('\n', out_file);
         str = strchr (str, '\0') + 1;
     }
 
+    PrintSep (out_file);
+
     return 0;
 }
 
+int PrintSep (FILE *out_file)
+{
+    if (out_file == NULL) return OUTPUT_ERROR;
+
+    for (unsigned int _ = 0; _ <= SEP_LEN; _++) fputc ('=', out_file);
+    fputc ('\n', out_file);
+
+    return 0;
+}
 
 void FreeText (struct Text *txt)
 {

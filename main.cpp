@@ -20,12 +20,12 @@ int main(int argc, char *argv[])
     if (out_file == NULL) return OUTPUT_ERROR;
 
     qsort     ((void *) (txt -> data), txt -> len, sizeof ((txt -> data)[0]), CompFwd);
-    WriteText (txt, out_file);
+    WriteText (txt, out_file, SKIP_EMPTY);
 
     Quicksort ((void *) (txt -> data), txt -> len, sizeof ((txt -> data)[0]), CompBwd);
-    WriteText (txt, out_file);
+    WriteText (txt, out_file, SKIP_EMPTY);
 
-    WriteOriginal (txt, out_file);
+    WriteOriginal (txt, out_file, NSKIP_EMPTY);
     
     fclose (out_file);
     FreeText (txt);

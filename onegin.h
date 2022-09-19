@@ -10,6 +10,8 @@
 #include <sys/stat.h>
 
 
+const size_t SEP_LEN = 107;
+
 struct Text
 {
     size_t len    = 0;
@@ -47,9 +49,11 @@ size_t CharReplace (char *str, char ch1, char ch2);
 int SetLines (struct Text *txt);
 
 
-int WriteText     (struct Text *txt, FILE *out_file);
+int WriteText     (struct Text *txt, FILE *out_file, int write_param);
 
-int WriteOriginal (struct Text *txt, FILE *out_file);
+int WriteOriginal (struct Text *txt, FILE *out_file, int write_param);
+
+int PrintSep (FILE *out_file);
 
 
 void FreeText (struct Text *txt);
@@ -57,10 +61,16 @@ void FreeText (struct Text *txt);
 
 enum ERRORS 
 {
-    INPUT_ERROR  = 1,
+     INPUT_ERROR = 1,
     OUTPUT_ERROR = 2,
     ACCESS_ERROR = 3,
-    ALLOC_ERROR  = 4,
+     ALLOC_ERROR = 4,
+};
+
+enum WRITE_PARAMS
+{
+    NSKIP_EMPTY = 0,
+     SKIP_EMPTY = 1,
 };
 
 
